@@ -1,0 +1,40 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "Mo",
+  "outputfilename": "Mo",
+  "frontend:dir": "internal/frontend",
+  "frontend:install": "pnpm install",
+  "frontend:build": "pnpm run build",
+  "frontend:dev:watcher": "pnpm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "k1LoW"
+  },
+  "info": {
+    "companyName": "k1LoW",
+    "productName": "Mo",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright (c) 2026 Ken'ichiro Oyama",
+    "comments": "Markdown viewer",
+    "fileAssociations": [
+      {
+        "ext": "md",
+        "name": "Markdown",
+        "role": "Viewer",
+        "iconName": "iconfile"
+      },
+      {
+        "ext": "markdown",
+        "name": "Markdown",
+        "role": "Viewer",
+        "iconName": "iconfile"
+      },
+      {
+        "ext": "mdx",
+        "name": "MDX",
+        "role": "Viewer",
+        "iconName": "iconfile"
+      }
+    ]
+  }
+}

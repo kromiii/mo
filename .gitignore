@@ -2,3 +2,7 @@ internal/static/dist/**/*
 internal/frontend/CREDITS_FRONTEND
 coverage.out
 mo
+build/bin/
+*.md5
+
+
