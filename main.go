@@ -24,11 +24,20 @@ package main
 import (
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/k1LoW/mo/cmd"
 )
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
+
+	// When launched from macOS Finder / Dock as an .app bundle without CLI subcommands
+	if strings.Contains(os.Args[0], ".app/Contents/MacOS/") {
+		if len(os.Args) == 1 || (len(os.Args) == 2 && strings.HasPrefix(os.Args[1], "-psn")) {
+			os.Args = []string{os.Args[0], "gui"}
+		}
+	}
+
 	cmd.Execute()
 }

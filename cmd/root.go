@@ -73,6 +73,7 @@ var (
 	clearBackup                  bool
 	jsonOutput                   bool
 	dangerouslyAllowRemoteAccess bool
+	guiMode                      bool
 )
 
 var rootCmd = &cobra.Command{
@@ -209,9 +210,14 @@ func init() {
 	rootCmd.Flags().BoolVar(&clearBackup, "clear", false, "Clear saved session for the specified port")
 	rootCmd.Flags().BoolVar(&jsonOutput, "json", false, "Output structured data as JSON to stdout")
 	rootCmd.Flags().BoolVar(&dangerouslyAllowRemoteAccess, "dangerously-allow-remote-access", false, "Allow remote access without authentication. Recommended only for trusted networks.")
+	rootCmd.Flags().BoolVar(&guiMode, "gui", false, "Launch mo in native desktop GUI window")
 }
 
 func run(cmd *cobra.Command, args []string) (retErr error) {
+	if guiMode {
+		return runDesktopGUI(port, args)
+	}
+
 	if !foreground || restore != "" {
 		logCleanup, err := logfile.Setup(port)
 		if err != nil {

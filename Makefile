@@ -17,6 +17,9 @@ test:
 build: generate
 	go build -ldflags=$(BUILD_LDFLAGS) -trimpath -o mo .
 
+desktop: generate
+	wails build -ldflags=$(BUILD_LDFLAGS) -trimpath
+
 dev: build
 	./mo -p 16275 --foreground $(ARGS)
 
@@ -47,4 +50,4 @@ credits: depsdev generate
 prerelease_for_tagpr: credits
 	git add CHANGELOG.md CREDITS go.mod go.sum
 
-.PHONY: default ci generate test build dev screenshot lint fmt fmt-check depsdev credits prerelease_for_tagpr
+.PHONY: default ci generate test build desktop dev screenshot lint fmt fmt-check depsdev credits prerelease_for_tagpr
