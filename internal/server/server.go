@@ -157,10 +157,13 @@ type Group struct {
 	Files []*FileEntry `json:"files"`
 }
 
-type sseEvent struct {
+// SSEEvent represents a server-sent event with a name and JSON data.
+type SSEEvent struct {
 	Name string // SSE event name
 	Data string // SSE data payload (JSON)
 }
+
+type sseEvent = SSEEvent
 
 const (
 	eventUpdate      = "update"
@@ -187,7 +190,7 @@ func (gp *GlobPattern) IsRecursive() bool {
 type State struct {
 	mu          sync.RWMutex
 	groups      map[string]*Group
-	subscribers map[chan sseEvent]struct{}
+	subscribers map[chan SSEEvent]struct{}
 	subMu       sync.RWMutex
 	watcher     *fswatcher.Watcher
 	restartCh   chan string
@@ -223,7 +226,7 @@ func NewState(ctx context.Context) *State {
 
 	s := &State{
 		groups:             make(map[string]*Group),
-		subscribers:        make(map[chan sseEvent]struct{}),
+		subscribers:        make(map[chan SSEEvent]struct{}),
 		watcher:            w,
 		restartCh:          make(chan string, 1),
 		shutdownCh:         make(chan struct{}, 1),
@@ -606,16 +609,16 @@ func (s *State) RemoveFile(id, groupName string) bool {
 	return true
 }
 
-func (s *State) Subscribe() chan sseEvent {
+func (s *State) Subscribe() chan SSEEvent {
 	s.subMu.Lock()
 	defer s.subMu.Unlock()
 
-	ch := make(chan sseEvent, 16)
+	ch := make(chan SSEEvent, 16)
 	s.subscribers[ch] = struct{}{}
 	return ch
 }
 
-func (s *State) Unsubscribe(ch chan sseEvent) {
+func (s *State) Unsubscribe(ch chan SSEEvent) {
 	s.subMu.Lock()
 	defer s.subMu.Unlock()
 
@@ -1232,7 +1235,7 @@ func (s *State) handleDirMove(dirPath string) {
 	}
 }
 
-func (s *State) sendEvent(e sseEvent) {
+func (s *State) sendEvent(e SSEEvent) {
 	s.subMu.RLock()
 	defer s.subMu.RUnlock()
 

@@ -33,7 +33,7 @@ func newTestState(t *testing.T) *State {
 	t.Cleanup(cancel)
 	s := &State{
 		groups:             make(map[string]*Group),
-		subscribers:        make(map[chan sseEvent]struct{}),
+		subscribers:        make(map[chan SSEEvent]struct{}),
 		restartCh:          make(chan string, 1),
 		shutdownCh:         make(chan struct{}, 1),
 		watchedDirs:        make(map[string]int),
@@ -968,7 +968,7 @@ func TestSendEvent_ConcurrentWithUnsubscribeDoesNotPanic(t *testing.T) {
 			}
 		}()
 		for range 100 {
-			s.sendEvent(sseEvent{Name: eventFileChanged, Data: "{}"})
+			s.sendEvent(SSEEvent{Name: eventFileChanged, Data: "{}"})
 		}
 	}()
 

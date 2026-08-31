@@ -98,6 +98,24 @@ func (a *App) Startup(ctx context.Context) {
 	} else {
 		slog.Warn("desktop server could not bind external port (another server may be running)", "addr", addr, "error", err)
 	}
+
+	// Subscribe to internal state events and forward to Wails runtime events
+	eventsCh := a.state.Subscribe()
+	donegroup.Go(a.ctx, func() error {
+		for {
+			select {
+			case <-a.ctx.Done():
+				return nil
+			case ev, ok := <-eventsCh:
+				if !ok {
+					return nil
+				}
+				if a.ctx.Value("events") != nil {
+					runtime.EventsEmit(a.ctx, ev.Name, ev.Data)
+				}
+			}
+		}
+	})
 }
 
 // Shutdown is called when the Wails application closes.
