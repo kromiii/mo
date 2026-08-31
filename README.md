@@ -35,6 +35,7 @@
 - Drag-and-drop file addition from the OS file manager (content is loaded in-memory; live-reload is not supported for dropped files)
 - Stdin pipe support (`cat file.md | mo`)
 - Live-reload on save (for files opened via CLI)
+- Native macOS desktop application support ([docs/desktop.md](docs/desktop.md))
 
 ## Install
 
@@ -212,6 +213,26 @@ Use `--clear` to remove a saved session. If a server is running, it is automatic
 $ mo --clear                      # Clear saved session for the default port
 $ mo --clear -p 6276              # Clear saved session for a specific port
 ```
+
+### Desktop Application (macOS)
+
+`mo` can be run as a native desktop application using [Wails](https://wails.io/):
+
+``` console
+$ mo gui README.md          # Open file in a dedicated desktop window
+$ mo --gui                  # Launch desktop application
+```
+
+To build the standalone macOS `.app` bundle:
+
+``` console
+$ make desktop              # Builds build/bin/Mo.app
+$ open build/bin/Mo.app
+```
+
+When `Mo.app` is open, any `mo <file>` command run from terminal automatically synchronizes with the active desktop window.
+
+See [docs/desktop.md](docs/desktop.md) for keyboard shortcuts, file associations, and architecture details.
 
 ### JSON output
 
