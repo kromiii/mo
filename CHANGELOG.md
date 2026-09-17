@@ -1,5 +1,7 @@
 # Changelog
 
+## [v1.6.8](https://github.com/kromiii/mo/commits/v1.6.8) - 2026-09-17
+
 ## [v1.6.8](https://github.com/k1LoW/mo/compare/v1.6.7...v1.6.8) - 2026-09-07
 
 ### New Features 🎉
