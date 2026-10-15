@@ -258,9 +258,9 @@ func run(cmd *cobra.Command, args []string) (retErr error) {
 		}
 
 		if wasServerRunning {
-			// Shut down the running server, wait for it to stop,
+			// Shut down the running server without saving backup, wait for it to stop,
 			// then restart with an empty state.
-			if err := doShutdown(addr); err != nil {
+			if err := doShutdown(addr, true); err != nil {
 				return err
 			}
 			if err := waitForServerDown(addr); err != nil {
@@ -268,10 +268,8 @@ func run(cmd *cobra.Command, args []string) (retErr error) {
 			}
 		}
 
-		if hasBackup {
-			if err := backup.Remove(port); err != nil {
-				return err
-			}
+		if err := backup.Remove(port); err != nil {
+			return err
 		}
 
 		if wasServerRunning {
@@ -996,7 +994,6 @@ func probeServer(addr string, timeout ...time.Duration) (*probeResult, error) {
 
 	var status struct {
 		Version string `json:"version"`
-		PID     int    `json:"pid"`
 		Groups  []struct {
 			Name string `json:"name"`
 		} `json:"groups"`
@@ -1032,13 +1029,18 @@ func waitForServerDown(addr string) error {
 	return fmt.Errorf("server on %s did not shut down within %s", addr, waitForServerDownTimeout)
 }
 
-func doShutdown(addr string) error {
+func doShutdown(addr string, clear ...bool) error {
 	result, err := probeServer(addr)
 	if err != nil {
 		return err
 	}
 
-	resp, err := result.client.Post(fmt.Sprintf("http://%s/_/api/shutdown", addr), "application/json", nil)
+	endpoint := fmt.Sprintf("http://%s/_/api/shutdown", addr)
+	if len(clear) > 0 && clear[0] {
+		endpoint += "?clear=true"
+	}
+
+	resp, err := result.client.Post(endpoint, "application/json", nil)
 	if err != nil {
 		return fmt.Errorf("failed to send shutdown request: %w", err)
 	}
