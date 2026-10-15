@@ -320,6 +320,36 @@ func TestHandleShutdown(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("clear=true disables backup saving", func(t *testing.T) {
+		ctx, cancel := donegroup.WithCancel(t.Context())
+		defer cancel()
+		s := NewState(ctx)
+		saved := false
+		s.EnableBackup(ctx, func(data RestoreData) {
+			saved = true
+		})
+		handler := NewHandler(s)
+		req := httptest.NewRequest("POST", "/_/api/shutdown?clear=true", nil)
+		rec := httptest.NewRecorder()
+
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusAccepted {
+			t.Fatalf("got status %d, want %d", rec.Code, http.StatusAccepted)
+		}
+
+		select {
+		case <-s.ShutdownCh():
+		default:
+			t.Fatal("shutdownCh should have received a signal")
+		}
+
+		s.saveBackup()
+		if saved {
+			t.Fatal("backup should not be saved when clear=true")
+		}
+	})
 }
 
 func TestHandleRestart(t *testing.T) {

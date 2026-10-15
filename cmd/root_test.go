@@ -1413,3 +1413,57 @@ func TestResolveArgs_MixedFilesAndDirs(t *testing.T) {
 		t.Fatalf("got %d files, want 2: %v", len(files), files)
 	}
 }
+
+func TestDoShutdown(t *testing.T) {
+	t.Run("sends shutdown request with clear=true", func(t *testing.T) {
+		var receivedQuery string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodGet && r.URL.Path == "/_/api/status" {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]any{"version": "test", "groups": []any{}}) //nolint:errcheck
+				return
+			}
+			if r.Method == http.MethodPost && r.URL.Path == "/_/api/shutdown" {
+				receivedQuery = r.URL.RawQuery
+				w.WriteHeader(http.StatusAccepted)
+				return
+			}
+			http.NotFound(w, r)
+		}))
+		t.Cleanup(srv.Close)
+
+		addr := strings.TrimPrefix(srv.URL, "http://")
+		if err := doShutdown(addr, true); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if receivedQuery != "clear=true" {
+			t.Errorf("got query %q, want clear=true", receivedQuery)
+		}
+	})
+
+	t.Run("sends normal shutdown request without clear query", func(t *testing.T) {
+		var receivedQuery string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodGet && r.URL.Path == "/_/api/status" {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]any{"version": "test", "groups": []any{}}) //nolint:errcheck
+				return
+			}
+			if r.Method == http.MethodPost && r.URL.Path == "/_/api/shutdown" {
+				receivedQuery = r.URL.RawQuery
+				w.WriteHeader(http.StatusAccepted)
+				return
+			}
+			http.NotFound(w, r)
+		}))
+		t.Cleanup(srv.Close)
+
+		addr := strings.TrimPrefix(srv.URL, "http://")
+		if err := doShutdown(addr, false); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if receivedQuery != "" {
+			t.Errorf("got query %q, want empty", receivedQuery)
+		}
+	})
+}

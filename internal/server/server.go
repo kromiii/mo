@@ -883,6 +883,14 @@ func (s *State) EnableBackup(ctx context.Context, saveFn func(RestoreData)) {
 	})
 }
 
+// DisableBackup disables backup saving so subsequent state changes and
+// shutdown do not persist state to disk.
+func (s *State) DisableBackup() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.backupSaveFn = nil
+}
+
 // snapshotRestoreData creates a RestoreData snapshot of the current state.
 // Caller must hold s.mu (at least RLock).
 func (s *State) snapshotRestoreData() RestoreData {
@@ -954,13 +962,15 @@ func (s *State) backupLoop(ctx context.Context) {
 }
 
 func (s *State) saveBackup() {
-	if s.backupSaveFn == nil {
+	s.mu.RLock()
+	fn := s.backupSaveFn
+	if fn == nil {
+		s.mu.RUnlock()
 		return
 	}
-	s.mu.RLock()
 	data := s.snapshotRestoreData()
 	s.mu.RUnlock()
-	s.backupSaveFn(data)
+	fn(data)
 }
 
 // groupHasPatterns reports whether the group has any registered watch patterns.
@@ -2270,6 +2280,9 @@ func handleRestart(state *State) http.HandlerFunc {
 
 func handleShutdown(state *State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("clear") == "true" {
+			state.DisableBackup()
+		}
 		w.WriteHeader(http.StatusAccepted)
 		select {
 		case state.shutdownCh <- struct{}{}:
