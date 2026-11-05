@@ -1,5 +1,12 @@
 # Changelog
 
+## [v1.7.1](https://github.com/kromiii/mo/compare/v1.7.0...v1.7.1) - 2026-11-05
+
+### New Features 🎉
+- feat: exclude git-ignored files by default and add --no-ignore flag by @kromiii in https://github.com/kromiii/mo/pull/3
+### Other Changes
+- fix: disable backup saving when shutting down via --clear by @kromiii in https://github.com/kromiii/mo/pull/2
+
 ## [v1.7.0](https://github.com/k1LoW/mo/compare/v1.6.9...v1.7.0) - 2026-10-21
 
 ### New Features 🎉
