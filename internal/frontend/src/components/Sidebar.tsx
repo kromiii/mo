@@ -92,7 +92,7 @@ function FileItem({
     <div className="relative group/file">
       <a
         href={buildFileUrl(activeGroup, file.id)}
-        className={`flex items-center gap-2 w-full px-3 py-2 border-none cursor-pointer text-left text-sm no-underline transition-colors duration-150 ${
+        className={`flex items-center gap-2 w-full px-3 py-2 border-none cursor-pointer text-left text-sm no-underline transition-colors duration-150 focus-visible:-outline-offset-2 ${
           isActive
             ? "bg-gh-bg-active text-gh-text font-semibold"
             : "bg-transparent text-gh-text-secondary hover:bg-gh-bg-hover"
@@ -127,7 +127,7 @@ function FileItem({
 }
 
 function SortableFileItem(props: FileItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: props.file.id,
   });
 
@@ -137,8 +137,11 @@ function SortableFileItem(props: FileItemProps) {
     opacity: isDragging ? 0.5 : undefined,
   };
 
+  // dnd-kit's `attributes` (role="button", tabIndex, aria-describedby pointing at
+  // keyboard drag instructions) are not spread: reordering is pointer-only, so they
+  // would announce a focusable sortable control that keyboard users cannot operate.
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...listeners}>
       <FileItem {...props} />
     </div>
   );
@@ -355,7 +358,7 @@ export function Sidebar({
               <>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between px-3 pt-2 pb-1 text-left text-xs font-semibold uppercase tracking-wide text-gh-text-secondary"
+                  className="flex w-full items-center justify-between px-3 pt-2 pb-1 text-left text-xs font-semibold uppercase tracking-wide text-gh-text-secondary focus-visible:-outline-offset-2"
                   onClick={() => setContentMatchesOpen((v) => !v)}
                   aria-expanded={contentMatchesOpen}
                 >
@@ -368,7 +371,7 @@ export function Sidebar({
                       <a
                         key={`${result.fileId}:${match.line}:${index}`}
                         href={buildFileUrl(activeGroup, result.fileId)}
-                        className="w-full px-3 py-2 text-left border-none bg-transparent cursor-pointer no-underline text-gh-text-secondary transition-colors duration-150 hover:bg-gh-bg-hover"
+                        className="w-full px-3 py-2 text-left border-none bg-transparent cursor-pointer no-underline text-gh-text-secondary transition-colors duration-150 focus-visible:-outline-offset-2 hover:bg-gh-bg-hover"
                         onClick={(e) => {
                           if (!isPlainLeftClick(e)) return;
                           e.preventDefault();
@@ -412,7 +415,7 @@ export function Sidebar({
               <>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between px-3 pt-2 pb-1 text-left text-xs font-semibold uppercase tracking-wide text-gh-text-secondary"
+                  className="flex w-full items-center justify-between px-3 pt-2 pb-1 text-left text-xs font-semibold uppercase tracking-wide text-gh-text-secondary focus-visible:-outline-offset-2"
                   onClick={() => setFileMatchesOpen((v) => !v)}
                   aria-expanded={fileMatchesOpen}
                 >
